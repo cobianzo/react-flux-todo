@@ -23,17 +23,20 @@ npm run watch
 
 # Developing a Flux App
 
-## Creating a new action (ie `add todo` action )
+## Flux
 
-- TodoActionTypes.js =>  `ADD_TODO: 'DELETE_TODO',`  
-- TodoActions.js => `deleteTodo(id) {  
-    TodoDispatcher.dispatch({  
-      type: TodoActionTypes.DELETE_TODO,  
-      todo_id,  
-    });  
-  },`  
-  where `todo_id` represents a param passed to the action defined in the `Store`  
-- AppContainer.js => `onDeleteTodo: TodoActions.deleteTodo,` <= these are the callbacks passed to the views.  
-- TodoStore.js => `case TodoActionTypes.ADD_TODO:  
-       return state.delete(action.todo_id)`  
-- 
+- AppContainer.js (unique for all the app)      
+Declares the state, accessible only through getState.  
+    - State is a set of Stores.  
+    - Declaration of Events that trigger Actions.  
+        - Eventually we could call the Actions from outside the App from any js code.  
+    - State Modifiable only through Actions, defined in the Stores.  
+
+- Store.js (store1, store2 ...)  
+A set of Records (ie posts) / Only 1 record with props (ie settings).  
+Code for actions declared in AppContainer.  
+        
+- View.js  (view1, view 2 ...)
+JSX that 
+    - show the State data
+    - trigger the Events declared in AppContainer

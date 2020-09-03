@@ -1,12 +1,18 @@
 /* Controller */
 import Immutable from 'immutable';
 import {ReduceStore} from 'flux/utils';
-import TodoActionTypes from './TodoActionTypes';
+// import TodoActionTypes from './TodoActionTypes';
 import TodoDispatcher from './TodoDispatcher';
 import Counter from './Counter';
-import Todo from './Todo';
+//import Todo from './Todo';
 
 
+const TodoModel = Immutable.Record({    id: '',
+                                        complete: false,
+                                        text: '',
+});
+
+// returns the state, declared in AppContainer as 'store' prop
 class TodoStore extends ReduceStore {
   constructor() {
     super(TodoDispatcher);
@@ -27,24 +33,24 @@ class TodoStore extends ReduceStore {
    */  
   reduce(state, action) {                           
     switch (action.type) {                          
-        case TodoActionTypes.ADD_TODO:
+        case 'ADD_TODO': // TodoActionTypes.ADD_TODO:
             // Don't add todos with no text.
             if (!action.text) {
                 return state;
             }
             const id = Counter.increment();
             return state.set(id, 
-                new Todo({
+                new TodoModel({
                     id,
                     text: action.text,
                     complete: false,
                 })
-            );
+            ); 
             
-        case TodoActionTypes.DELETE_TODO:
+        case 'DELETE_TODO': // TodoActionTypes.DELETE_TODO:
             return state.delete(action.id);
     
-        case TodoActionTypes.TOGGLE_TODO:
+        case 'TOGGLE_TODO': // TodoActionTypes.TOGGLE_TODO:
             return state.update(
                 action.id,
                 todo => todo.set('complete', !todo.complete),

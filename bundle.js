@@ -67,10 +67,6 @@
 
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 
-	var _TodoActions = __webpack_require__(314);
-
-	var _TodoActions2 = _interopRequireDefault(_TodoActions);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	_reactDom2.default.render(_react2.default.createElement(_AppContainer2.default, null), document.getElementById('todoapp'));
@@ -78,9 +74,9 @@
 	//INIT SOME fake data
 	// We will remove these lines later:
 
-	_TodoActions2.default.addTodo('My first task');
-	_TodoActions2.default.addTodo('Another task');
-	_TodoActions2.default.addTodo('Finish this tutorial');
+	_AppContainer.Actions.addTodo('My first task');
+	_AppContainer.Actions.addTodo('Another task');
+	_AppContainer.Actions.addTodo('Finish this tutorial');
 
 /***/ }),
 /* 1 */
@@ -22273,6 +22269,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.Actions = undefined;
 
 	var _AppView = __webpack_require__(188);
 
@@ -22284,9 +22281,9 @@
 
 	var _TodoStore2 = _interopRequireDefault(_TodoStore);
 
-	var _TodoActions = __webpack_require__(314);
+	var _TodoDispatcher = __webpack_require__(299);
 
-	var _TodoActions2 = _interopRequireDefault(_TodoActions);
+	var _TodoDispatcher2 = _interopRequireDefault(_TodoDispatcher);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -22296,17 +22293,32 @@
 	function getStores() {
 	  return [_TodoStore2.default];
 	}
+	// import TodoActions from '../data/TodoActions';
+
 
 	function getState() {
 	  // App DATA. MODELS wrapper.
 	  return {
 	    todos: _TodoStore2.default.getState(),
 
-	    // Events in the state, so they can be used in children components as props.
-	    onDeleteTodo: _TodoActions2.default.deleteTodo,
-	    onToggleTodo: _TodoActions2.default.toggleTodo
+	    // Events in the state, so they can be used in Components' View as props.onDeleteTodo(id). The event dispatch an action
+	    onDeleteTodo: Actions.deleteTodo,
+	    onToggleTodo: Actions.toggleTodo //TodoActions.toggleTodo,
 	  };
 	}
+
+	// by defining them here, we could call them from outside the app with Actions.addTodo('my task').
+	var Actions = exports.Actions = {
+	  addTodo: function addTodo(text) {
+	    return _TodoDispatcher2.default.dispatch({ type: 'ADD_TODO', text: text });
+	  },
+	  deleteTodo: function deleteTodo(id) {
+	    return _TodoDispatcher2.default.dispatch({ type: 'DELETE_TODO', id: id });
+	  },
+	  toggleTodo: function toggleTodo(id) {
+	    return _TodoDispatcher2.default.dispatch({ type: 'TOGGLE_TODO', id: id });
+	  }
+	};
 
 	exports.default = _utils.Container.createFunctional(_AppView2.default, getStores, getState);
 
@@ -26189,10 +26201,6 @@
 
 	var _utils = __webpack_require__(189);
 
-	var _TodoActionTypes = __webpack_require__(298);
-
-	var _TodoActionTypes2 = _interopRequireDefault(_TodoActionTypes);
-
 	var _TodoDispatcher = __webpack_require__(299);
 
 	var _TodoDispatcher2 = _interopRequireDefault(_TodoDispatcher);
@@ -26201,13 +26209,20 @@
 
 	var _Counter2 = _interopRequireDefault(_Counter);
 
-	var _Todo = __webpack_require__(303);
-
-	var _Todo2 = _interopRequireDefault(_Todo);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	//import Todo from './Todo';
+
+
+	// import TodoActionTypes from './TodoActionTypes';
 	/* Controller */
+	var TodoModel = _immutable2.default.Record({ id: '',
+	    complete: false,
+	    text: ''
+	});
+
+	// returns the state, declared in AppContainer as 'store' prop
+
 	var TodoStore = function (_ReduceStore) {
 	    (0, _inherits3.default)(TodoStore, _ReduceStore);
 
@@ -26236,22 +26251,25 @@
 	        key: 'reduce',
 	        value: function reduce(state, action) {
 	            switch (action.type) {
-	                case _TodoActionTypes2.default.ADD_TODO:
+	                case 'ADD_TODO':
+	                    // TodoActionTypes.ADD_TODO:
 	                    // Don't add todos with no text.
 	                    if (!action.text) {
 	                        return state;
 	                    }
 	                    var id = _Counter2.default.increment();
-	                    return state.set(id, new _Todo2.default({
+	                    return state.set(id, new TodoModel({
 	                        id: id,
 	                        text: action.text,
 	                        complete: false
 	                    }));
 
-	                case _TodoActionTypes2.default.DELETE_TODO:
+	                case 'DELETE_TODO':
+	                    // TodoActionTypes.DELETE_TODO:
 	                    return state.delete(action.id);
 
-	                case _TodoActionTypes2.default.TOGGLE_TODO:
+	                case 'TOGGLE_TODO':
+	                    // TodoActionTypes.TOGGLE_TODO:
 	                    return state.update(action.id, function (todo) {
 	                        return todo.set('complete', !todo.complete);
 	                    });
@@ -32864,23 +32882,7 @@
 	}));
 
 /***/ }),
-/* 298 */
-/***/ (function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	var ActionTypes = {
-	    ADD_TODO: 'ADD_TODO',
-	    DELETE_TODO: 'DELETE_TODO',
-	    TOGGLE_TODO: 'TOGGLE_TODO'
-	};
-
-	exports.default = ActionTypes;
-
-/***/ }),
+/* 298 */,
 /* 299 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -33178,33 +33180,7 @@
 	exports.default = Counter;
 
 /***/ }),
-/* 303 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _immutable = __webpack_require__(297);
-
-	var _immutable2 = _interopRequireDefault(_immutable);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Todo = _immutable2.default.Record({
-	  id: '',
-	  complete: false,
-	  text: ''
-	}); /*
-	     MODEL.
-	     a var type Todo is a record (it's not a component)
-	    */
-
-	exports.default = Todo;
-
-/***/ }),
+/* 303 */,
 /* 304 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -33404,48 +33380,6 @@
 	  return safe;
 	};
 
-
-/***/ }),
-/* 314 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _TodoActionTypes = __webpack_require__(298);
-
-	var _TodoActionTypes2 = _interopRequireDefault(_TodoActionTypes);
-
-	var _TodoDispatcher = __webpack_require__(299);
-
-	var _TodoDispatcher2 = _interopRequireDefault(_TodoDispatcher);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Actions = {
-	    addTodo: function addTodo(text) {
-	        _TodoDispatcher2.default.dispatch({
-	            type: _TodoActionTypes2.default.ADD_TODO,
-	            text: text
-	        });
-	    },
-	    deleteTodo: function deleteTodo(id) {
-	        _TodoDispatcher2.default.dispatch({
-	            type: _TodoActionTypes2.default.DELETE_TODO,
-	            id: id
-	        });
-	    },
-	    toggleTodo: function toggleTodo(id) {
-	        _TodoDispatcher2.default.dispatch({
-	            type: _TodoActionTypes2.default.TOGGLE_TODO,
-	            id: id
-	        });
-	    }
-	};
-	exports.default = Actions;
 
 /***/ })
 /******/ ]);
